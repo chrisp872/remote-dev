@@ -1,6 +1,9 @@
 export default function SearchForm() {
   return (
-    <form action="#" className="search">
+    <form onSubmit={e => {
+      e.preventDefault();
+      
+    }} action="#" className="search">
       <button type="submit">
         <i className="fa-solid fa-magnifying-glass"></i>
       </button>
