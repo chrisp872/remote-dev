@@ -1,18 +1,29 @@
-export default function SearchForm({searchtext, setSearchText}) {
+type searchFormProps = {
+  searchText: string;
+  setSearchText: (text: string) => void;
+};
 
+export default function SearchForm({
+  searchText,
+  setSearchText,
+}: searchFormProps) {
   return (
-    <form onSubmit={e => {
-      e.preventDefault();
-      
-    }}
-     action="#" className="search">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+      }}
+      action="#"
+      className="search"
+    >
       <button type="submit">
         <i className="fa-solid fa-magnifying-glass"></i>
       </button>
 
       <input
-        value={searchtext}
-        onChange={e => {setSearchText(e.target.value)}}
+        value={searchText}
+        onChange={(e) => {
+          setSearchText(e.target.value);
+        }}
         spellCheck="false"
         type="text"
         required
