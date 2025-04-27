@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Background from "./Background";
 import Container from "./Container";
 import Footer from "./Footer";
@@ -13,14 +13,15 @@ import ResultsCount from "./ResultsCount";
 import SortingControls from "./SortingControls";
 import { useDebounce, useJobItems } from "../lib/hooks";
 import JobItemContent from "./JobItemContent";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   const [searchText, setSearchText] = useState<string>("");
   const debouncedSearchText = useDebounce(searchText, 300);
   const { jobItems, isLoading } = useJobItems(debouncedSearchText);
 
-  const totalJobItems = jobItems.length;
-  const jobItemsSliced = jobItems.slice(0, 7);
+  const totalJobItems = jobItems?.length || 0;
+  const jobItemsSliced = jobItems?.slice(0, 7) || [];
 
   return (
     <>
@@ -50,6 +51,8 @@ function App() {
       </Container>
 
       <Footer />
+
+      <Toaster position={"top-right"} />
     </>
   );
 }
