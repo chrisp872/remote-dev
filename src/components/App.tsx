@@ -14,6 +14,7 @@ import SortingControls from "./SortingControls";
 import { useDebounce, useJobItems } from "../lib/hooks";
 import JobItemContent from "./JobItemContent";
 import { JOB_ITEMS_PER_PAGE } from "../lib/constants";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   // state
@@ -23,9 +24,9 @@ function App() {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   // derived state
-  const totalJobItems = jobItems.length;
+  const totalJobItems = jobItems?.length || 0;
   const totalPages = totalJobItems / JOB_ITEMS_PER_PAGE;
-  const jobItemsSliced = jobItems.slice(
+  const jobItemsSliced = jobItems?.slice(
     currentPage * JOB_ITEMS_PER_PAGE - JOB_ITEMS_PER_PAGE,
     currentPage * JOB_ITEMS_PER_PAGE
   );
@@ -71,6 +72,8 @@ function App() {
       </Container>
 
       <Footer />
+
+      <Toaster position={"top-right"} />
     </>
   );
 }
