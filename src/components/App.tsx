@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Background from "./Background";
 import Container from "./Container";
 import Footer from "./Footer";
@@ -13,14 +13,31 @@ import ResultsCount from "./ResultsCount";
 import SortingControls from "./SortingControls";
 import { useDebounce, useJobItems } from "../lib/hooks";
 import JobItemContent from "./JobItemContent";
+import { JOB_ITEMS_PER_PAGE } from "../lib/constants";
 
 function App() {
+  // state
   const [searchText, setSearchText] = useState<string>("");
   const debouncedSearchText = useDebounce(searchText, 300);
   const { jobItems, isLoading } = useJobItems(debouncedSearchText);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
+  // derived state
   const totalJobItems = jobItems.length;
-  const jobItemsSliced = jobItems.slice(0, 7);
+  const totalPages = totalJobItems / JOB_ITEMS_PER_PAGE;
+  const jobItemsSliced = jobItems.slice(
+    currentPage * JOB_ITEMS_PER_PAGE - JOB_ITEMS_PER_PAGE,
+    currentPage * JOB_ITEMS_PER_PAGE
+  );
+
+  // event handlers
+  const handlePageChange = (direction: "next" | "prev") => {
+    if (direction === "next") {
+      setCurrentPage((prevPage) => prevPage + 1);
+    } else if (direction === "prev") {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
 
   return (
     <>
@@ -44,7 +61,11 @@ function App() {
 
           <JobList jobItems={jobItemsSliced} isLoading={isLoading} />
 
-          <PaginationControls />
+          <PaginationControls
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onChangePage={handlePageChange}
+          />
         </Sidebar>
         <JobItemContent />
       </Container>
