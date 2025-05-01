@@ -1,8 +1,12 @@
+export type SortBy = "relevant" | "recent";
+
+export type PageDirection = "next" | "prev";
+
 export type JobItem = {
   id: number;
   title: string;
   company: string;
-  daysAgo: string;
+  daysAgo: number;
   badgeLetters: string;
   relevanceScore: number;
 };
