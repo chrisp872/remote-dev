@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { JobItem, JobItemDetails } from "./types";
 import { BASE_API_URL } from "./constants";
 import { useQuery } from "@tanstack/react-query";
 import { handleError } from "./utils";
+import { BookmarksContext } from "../contexts/BookmarksContextProvider";
 
 type JobItemApiResponse = {
   public: boolean;
@@ -99,7 +100,7 @@ export function useActiveId() {
   return activeId;
 }
 
-export function useDebounce(value, delay: number = 1000) {
+export function useDebounce<T>(value: T, delay: number = 1000): T {
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
@@ -108,4 +109,30 @@ export function useDebounce(value, delay: number = 1000) {
   }, [value, delay]);
 
   return debouncedValue;
+}
+
+export function useLocalStorage<T>(
+  key: string,
+  initialValue: T
+): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [value, setValue] = useState(() =>
+    JSON.parse(localStorage.getItem(key) || JSON.stringify(initialValue))
+  );
+
+  useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(value));
+  }, [value, key]);
+
+  return [value, setValue] as const;
+}
+
+// Context hooks -------------------------------
+export function useBookmarksContext() {
+  const context = useContext(BookmarksContext);
+  if (!context) {
+    throw new Error(
+      "useBookmarksContext must be used within a BookmarksContextProvider"
+    );
+  }
+  return context;
 }
