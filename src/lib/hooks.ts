@@ -1,9 +1,12 @@
 import { useState, useEffect, useContext } from "react";
 import { JobItem, JobItemDetails } from "./types";
 import { BASE_API_URL } from "./constants";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { handleError } from "./utils";
 import { BookmarksContext } from "../contexts/BookmarksContextProvider";
+import { ActiveIdContext } from "../contexts/ActiveIdContextProvider";
+import { SearchTextContext } from "../contexts/SearchTextContextProvider";
+import { JobItemsContext } from "../contexts/JobItemsContextProvider";
 
 type JobItemApiResponse = {
   public: boolean;
@@ -27,6 +30,27 @@ const fetchJobItem = async (id: number): Promise<JobItemApiResponse> => {
   const data = await response.json();
   return data;
 };
+
+export function useJobItems(ids: number[]) {
+  const results = useQueries({
+    queries: ids.map((id) => ({
+      queryKey: ["job-item", id],
+      queryFn: () => fetchJobItem(id),
+      staleTime: 1000 * 60 * 60,
+      refetchOnWindowFocus: false,
+      retry: false,
+      enabled: Boolean(id),
+      onError: handleError,
+    })),
+  });
+
+  const jobItems = results
+    .map((result) => result.data?.jobItem)
+    .filter((jobItem) => jobItem !== undefined);
+  const isLoading = results.some((result) => result.isLoading);
+
+  return { jobItems, isLoading } as const;
+}
 
 export function useJobItem(id: number | null) {
   const { data, isInitialLoading } = useQuery(
@@ -60,7 +84,7 @@ const fetchJobItems = async (
   return data;
 };
 
-export function useJobItems(searchText: string) {
+export function useSearchQuery(searchText: string) {
   const { data, isInitialLoading } = useQuery(
     ["job-items", searchText],
     () => (searchText ? fetchJobItems(searchText) : null),
@@ -126,12 +150,65 @@ export function useLocalStorage<T>(
   return [value, setValue] as const;
 }
 
+export function useClickOutside(
+  refs: React.RefObject<HTMLElement>[],
+  callback: () => void
+) {
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        refs.every((ref) => ref.current && !ref.current.contains(target)) &&
+        target.tagName !== "BUTTON"
+      ) {
+        callback();
+      }
+    };
+
+    document.addEventListener("click", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [refs, callback]);
+}
+
 // Context hooks -------------------------------
 export function useBookmarksContext() {
   const context = useContext(BookmarksContext);
   if (!context) {
     throw new Error(
       "useBookmarksContext must be used within a BookmarksContextProvider"
+    );
+  }
+  return context;
+}
+
+export function useActiveIdContext() {
+  const context = useContext(ActiveIdContext);
+  if (!context) {
+    throw new Error(
+      "useActiveIdContext must be used within a ActiveIdContextProvider"
+    );
+  }
+  return context;
+}
+
+export function useSearchTextContext() {
+  const context = useContext(SearchTextContext);
+  if (!context) {
+    throw new Error(
+      "useSearchTextContext must be used within a SearchTextContextProvider"
+    );
+  }
+  return context;
+}
+
+export function useJobItemsContext() {
+  const context = useContext(JobItemsContext);
+  if (!context) {
+    throw new Error(
+      "useJobItemsContext must be used within a JobItemsContextProvider"
     );
   }
   return context;
